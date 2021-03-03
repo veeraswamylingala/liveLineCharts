@@ -9,9 +9,9 @@ import { ScrollView } from "react-native";
 import ReactDOM from "react-dom";
 //import   "chartjs-plugin-streaming";
 
-let values = [65];
-let values1 = [5];
-let dateTme = [new Date().getTime()];
+let values = [65,45,78,89,56,45,78,45,12,24,23,15,78,56];
+let values1 = [5,3,4,6,7,8,9,4,5,6,1,2,32,2];
+let dateTme = [new Date().getTime()]
 var xAxisLabelMinWidth = 10;
 
 
@@ -19,7 +19,12 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.chartRef = React.createRef();
-
+    // for(var i=0;i<20;i++)
+    // {
+    //   values.push(values.length+1);
+    //   values1.push(values1.length+2);
+    // }
+   
 
     this.state = {
       timerInterval: 1000,
@@ -30,10 +35,14 @@ export default class App extends React.Component {
         currentWindowSpan: 60,
         singlePoint: 10,
         graphWidth: 10,
+        pan :false,
+        zoom:true
    }
-
   }
+
+
   componentDidMount() {
+    
     this.myChart = new Chart(this.chartRef.current, {
       type: "line",
       options: {
@@ -101,7 +110,8 @@ export default class App extends React.Component {
             pointRadius: 2,
             borderColor: "Black",
             borderWidth: 1,
-            lineTension: 0.5
+            lineTension: 0.5,
+            Hidden:false
           },
           {
             label: "Chart1",
@@ -134,10 +144,8 @@ export default class App extends React.Component {
     console.log(this.maxWidth);
     console.log("window-Width");
     console.log(this.state.windowWidth);
-
+    console.log("Print");
   }
-
-
 
   update() {
 
@@ -146,7 +154,6 @@ export default class App extends React.Component {
       this.setState({currentDate:new Date().toLocaleString()});
     }
   
-
 
      this.date = new Date().toLocaleString();
 
@@ -158,30 +165,24 @@ export default class App extends React.Component {
     this.myChart.data.labels.push(new Date().getTime());
     this.myChart.data.datasets[0].data.push(rand);
     this.myChart.data.datasets[1].data.push(rand1);
-
     console.log(this.myChart.data.labels.length);
-
 
     //this is to find the width of the Graph Screen-----
 
   this.singlepoint()
-    
     //This is to scroll the graph after the currentWindowSpan
     if (this.myChart.data.labels.length > 60) {
-      
-
+  
     const tempwidth = this.myChart.data.labels.length*this.state.singlePoint
 
          var width = tempwidth + this.state.singlePoint ;
-
+        
       this.chartRef.current.parentElement.style.width = width + "px";
-
 
       this.setState({graphWidth:width});
 
       this.scrollView.scrollTo({ x: width });
     }
-
     this.myChart.update();
     //setTimeout(this.componentDidUpdate(), this.state.timerInterval);
     //    this.scrollToBottom();
@@ -240,13 +241,37 @@ export default class App extends React.Component {
     }
 
 
+    hiddenOnClick = (e)  => {
+      console.log("hidden Selected");
+
+      this.myChart.data.datasets[0].hidden = !this.myChart.data.datasets[0].hidden
+
+    }
+
+
+    handleChange = () =>{
+      console.log("Checkbox Clicked");
+      
+    }
+
+
+
+
+    panOnClick = (e) => {
+      console.log("Pan Clicked");
+      this.myChart.options.pan.enabled = !this.state.pan 
+      this.myChart.options.zoom.enabled = !this.state.zoom 
+      this.setState({pan: !this.state.pan} );
+      this.setState({zoom: !this.state.zoom} );
+
+    }
+
   render() {
 
     let start = (this.state.isOn == true) ?
       <button   className="btn btn-primary" onClick={this.handleClick}>Stop Graph</button> :
       <button  className="btn btn-primary" onClick={this.handleClick}>Resume Graph</button>
 
-  
 
     return (
       <div style={{width:"400"}}>
@@ -254,8 +279,6 @@ export default class App extends React.Component {
           ref={(ref) => {
             this.scrollView = ref;
           }}
-
-          // onContentSizeChange={() => this.scrollView.scrollTo({x:height})}
         >
          <canvas id="chart" width="500px" ref={this.chartRef}></canvas>
         </ScrollView>
@@ -289,10 +312,21 @@ export default class App extends React.Component {
 
          <div>{start}
         </div>  
+  
+       {/* // <input type="checkbox" checked={item.value} onChange={this.handleChange.bind(this, index)}/> */}
+       <input type="checkbox"   onChange={this.handleChange()} / >
+
+        <div>
+        <button   className="btn btn-primary" onClick={this.hiddenOnClick}>Hidden</button></div>
 
 <div>
         <button   className="btn btn-primary" onClick={this.ResetGraphhandleClick}>Reset Graph</button></div>
+
+        <div>
+        <button   className="btn btn-primary" onClick={this.panOnClick}>Pan{this.state.pan}</button></div>
      </div>
+
+
     );
   }
 }
